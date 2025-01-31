@@ -1,38 +1,40 @@
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect } from 'react'
 import { SelectableGroupType, SelectableType } from '../types'
 import { useArrowNavigationStore } from '../store'
 import { useShallow } from 'zustand/shallow'
 
 export const useSelectableGroup = (group: SelectableGroupType) => {
-  const { registerSelectableGroup, unregisterSelectableGroup } = useArrowNavigationStore(useShallow((state) => state))
-
-  useEffect(() => {
-    registerSelectableGroup(group)
-    return () => unregisterSelectableGroup(group.id)
-  }, [group, registerSelectableGroup, unregisterSelectableGroup])
-
-  const { eventManager } = useArrowNavigationStore(useShallow(({ eventManager }) => ({ eventManager })))
-
-  const childrenIds = useRef<string[]>([])
-
-  const onElementRegistered = useCallback(
-    (selectable: SelectableType) => {
-      if (selectable.groupId === group.id) childrenIds.current.push(selectable.id)
-    },
-    [group.id]
+  const { registerSelectableGroup, unregisterSelectableGroup, eventManager } = useArrowNavigationStore(
+    useShallow((state) => state)
   )
 
-  const onElementUnregistered = useCallback((elementId: string) => {
-    if (childrenIds.current.find((childId) => childId === elementId))
-      childrenIds.current = childrenIds.current.filter((childId) => childId !== elementId)
-  }, [])
+  const onAnyElementFocused = useCallback(
+    (selectable: SelectableType) => {
+      if (selectable.groupId === group.id) {
+        group.onElementFocused?.(selectable)
+      }
+    },
+    [group]
+  )
+
+  const onAnyGroupLeaved = useCallback(
+    (leftGroup: SelectableGroupType) => {
+      if (leftGroup.id === group.id) {
+        group.onGroupLeaved?.(leftGroup)
+      }
+    },
+    [group]
+  )
 
   useEffect(() => {
-    eventManager.on('elementRegistered', onElementRegistered)
-    eventManager.on('elementUnregistered', onElementUnregistered)
+    eventManager.on('onElementFocused', onAnyElementFocused)
+    eventManager.on('onGroupLeaved', onAnyGroupLeaved)
+    registerSelectableGroup(group)
+
     return () => {
-      eventManager.off('elementRegistered', onElementRegistered)
-      eventManager.off('elementUnregistered', onElementUnregistered)
+      eventManager.off('onElementFocused', onAnyElementFocused)
+      eventManager.off('onGroupLeaved', onAnyGroupLeaved)
+      unregisterSelectableGroup(group.id)
     }
-  }, [eventManager, onElementRegistered, onElementUnregistered])
+  }, [eventManager, group, onAnyElementFocused, onAnyGroupLeaved, registerSelectableGroup, unregisterSelectableGroup])
 }

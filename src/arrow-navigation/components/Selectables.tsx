@@ -4,7 +4,7 @@ import { Selectable, SelectableProps } from '../selectable/Selectable'
 type Props<T extends HTMLElement> = Omit<SelectableProps, 'As' | 'props'> & HTMLAttributes<T>
 
 const SelectableDiv = (props: Props<HTMLDivElement>) => (
-  <Selectable {...props} props={props} As="div">
+  <Selectable {...props} props={{ tabIndex: -1, ...props }} As="div">
     {props.children}
   </Selectable>
 )

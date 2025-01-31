@@ -1,4 +1,4 @@
-import { ReactNode, useCallback, useEffect, useLayoutEffect, useRef } from 'react'
+import { ReactNode, useEffect, useLayoutEffect, useRef } from 'react'
 import { useArrowNavigationStore } from '../store'
 import { useShallow } from 'zustand/shallow'
 import { SelectableGroupType, SelectableType } from '../types'
@@ -36,6 +36,20 @@ export const SelectionController = ({ children, initialFocusedId }: SelectionCon
 
   const { eventManager } = useArrowNavigationStore(useShallow((state) => state))
 
+  const focusElement = (selectable: SelectableType) => {
+    const elementThatWasFocused = focusedIdRef.current ? selectablesRef.current.get(focusedIdRef.current) : null
+
+    selectable.ref.current?.focus()
+    focusedIdRef.current = selectable.id
+
+    eventManager.emit('onElementFocused', selectable)
+
+    if (elementThatWasFocused?.groupId && elementThatWasFocused.groupId !== selectable.groupId) {
+      const unfocusedGroup = groupsRef.current.get(elementThatWasFocused.groupId)
+      if (unfocusedGroup) eventManager.emit('onGroupLeaved', unfocusedGroup)
+    }
+  }
+
   const tryFocusWithCurrentGroup = (
     currentFocus: SelectableType,
     code: string,
@@ -50,17 +64,19 @@ export const SelectionController = ({ children, initialFocusedId }: SelectionCon
         if (!s.ref.current) return false
         if (s.id === currentFocus.id) return false
 
+        const sRect = s.ref.current.getBoundingClientRect()
+
+        if (directionData.axis === 'x') {
+          if (currentFocusPosition.bottom < sRect.top || currentFocusPosition.top > sRect.bottom) return false
+        } else if (directionData.axis === 'y') {
+          if (currentFocusPosition.right < sRect.left || currentFocusPosition.left > sRect.right) return false
+        }
+
         switch (directionData.comparisonDirection) {
           case -1:
-            return (
-              s.ref.current.getBoundingClientRect()[directionData.edgeToCompareWith] <
-              currentFocusPosition[directionData.edge]
-            )
+            return sRect[directionData.edgeToCompareWith] < currentFocusPosition[directionData.edge]
           case 1:
-            return (
-              s.ref.current.getBoundingClientRect()[directionData.edgeToCompareWith] >
-              currentFocusPosition[directionData.edge]
-            )
+            return sRect[directionData.edgeToCompareWith] > currentFocusPosition[directionData.edge]
         }
       })
 
@@ -102,16 +118,18 @@ export const SelectionController = ({ children, initialFocusedId }: SelectionCon
               filterUntruthy(selectablesFromGroup.map((s) => s.ref.current)),
               currentFocus.ref.current
             )
+
             if (elementToFocusFromPolicy) {
-              elementToFocusFromPolicy.focus()
-              focusedIdRef.current = selectablesRef.current.get(elementToFocusFromPolicy.id)?.id
-              return true
+              const selectableToFocus = selectables.get(elementToFocusFromPolicy.id)
+              if (selectableToFocus) {
+                focusElement(selectableToFocus)
+                return true
+              }
             }
           }
         }
 
-        bestCandidate.item.ref.current?.focus()
-        focusedIdRef.current = bestCandidate.item.id
+        focusElement(bestCandidate.item)
         return true
       }
     }
@@ -119,10 +137,10 @@ export const SelectionController = ({ children, initialFocusedId }: SelectionCon
     return false
   }
 
-  const onKeyDown = useCallback((e: KeyboardEvent) => {
+  const onKeyDown = (e: KeyboardEvent) => {
     if (!focusedIdRef.current) {
-      selectablesRef.current.values().next().value?.ref.current?.focus()
-      focusedIdRef.current = selectablesRef.current.values().next().value?.id
+      const firstElement = selectablesRef.current.values().next().value
+      if (firstElement) focusElement(firstElement)
       return
     }
 
@@ -133,25 +151,12 @@ export const SelectionController = ({ children, initialFocusedId }: SelectionCon
     if (!currentlyFocusedElement) return
 
     if (tryFocusWithCurrentGroup(currentlyFocusedElement, e.code, selectables)) return
+  }
 
-    // Interroge le next du controller
-  }, [])
-
-  const onElementRegistered = useCallback((selectable: SelectableType) => {
-    selectablesRef.current.set(selectable.id, selectable)
-  }, [])
-
-  const onElementUnregistered = useCallback((id: string) => {
-    selectablesRef.current.delete(id)
-  }, [])
-
-  const onGroupRegistered = useCallback((group: SelectableGroupType) => {
-    groupsRef.current.set(group.id, group)
-  }, [])
-
-  const onGroupUnregistered = useCallback((id: string) => {
-    groupsRef.current.delete(id)
-  }, [])
+  const onElementRegistered = (selectable: SelectableType) => selectablesRef.current.set(selectable.id, selectable)
+  const onElementUnregistered = (id: string) => selectablesRef.current.delete(id)
+  const onGroupRegistered = (group: SelectableGroupType) => groupsRef.current.set(group.id, group)
+  const onGroupUnregistered = (id: string) => groupsRef.current.delete(id)
 
   useEffect(() => {
     if (isInitialRender.current) {

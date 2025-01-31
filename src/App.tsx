@@ -1,108 +1,38 @@
 import { selectable } from './arrow-navigation/components/Selectables'
 import { SelectionController } from './arrow-navigation/controller/SelectionController'
-import { EnteringPolicy } from './arrow-navigation/group/entering-policy'
-import { SelectableGroup } from './arrow-navigation/group/SelectableGroup'
+import { MovieCategory } from './movies/MovieCategory'
+import { NavBar } from './navbar/NavBar'
 
 function App() {
   return (
     <SelectionController>
-      <SelectableGroup enteringPolicy={EnteringPolicy.FromDirection}>
-        <h1 className="text-4xl mb-4">Pour vous</h1>
-        <div className="flex flex-row gap-8">
-          <selectable.button className="w-full p-4 bg-red-600 focus:bg-white focus:outline focus:outline-black">
-            10
-          </selectable.button>
-          <selectable.button className="w-full p-4 bg-red-600 focus:bg-white focus:outline focus:outline-black">
-            11
-          </selectable.button>
-          <selectable.button className="w-full p-4 bg-red-600 focus:bg-white focus:outline focus:outline-black">
-            12
-          </selectable.button>
-          <selectable.button className="w-full p-4 bg-red-600 focus:bg-white focus:outline focus:outline-black">
-            13
-          </selectable.button>
-          <selectable.button className="w-full p-4 bg-red-600 focus:bg-white focus:outline focus:outline-black">
-            14
-          </selectable.button>
-          <selectable.button className="w-full p-4 bg-red-600 focus:bg-white focus:outline focus:outline-black">
-            15
-          </selectable.button>
-          <selectable.button className="w-full p-4 bg-red-600 focus:bg-white focus:outline focus:outline-black">
-            16
-          </selectable.button>
-          <selectable.button className="w-full p-4 bg-red-600 focus:bg-white focus:outline focus:outline-black">
-            17
-          </selectable.button>
-          <selectable.button className="w-full p-4 bg-red-600 focus:bg-white focus:outline focus:outline-black">
-            18
-          </selectable.button>
-        </div>
-      </SelectableGroup>
-      <h1 className="text-4xl mb-4">A la une</h1>
-      <SelectableGroup enteringPolicy={EnteringPolicy.Left}>
-        <div className="grid grid-cols-3 gap-8">
-          <selectable.button className="p-4 bg-red-600 focus:bg-white focus:outline focus:outline-black">
-            1
-          </selectable.button>
-          <selectable.button className="p-4 bg-red-600 focus:bg-white focus:outline focus:outline-black">
-            2
-          </selectable.button>
-          <selectable.button className="p-4 bg-red-600 focus:bg-white focus:outline focus:outline-black">
-            3
-          </selectable.button>
-          <selectable.button className="p-4 bg-red-600 focus:bg-white focus:outline focus:outline-black">
-            4
-          </selectable.button>
-          <selectable.button className="p-4 bg-red-600 focus:bg-white focus:outline focus:outline-black">
-            5
-          </selectable.button>
-          <selectable.button className="p-4 bg-red-600 focus:bg-white focus:outline focus:outline-black">
-            6
-          </selectable.button>
-          <selectable.button className="p-4 bg-red-600 focus:bg-white focus:outline focus:outline-black">
-            7
-          </selectable.button>
-          <selectable.button className="p-4 bg-red-600 focus:bg-white focus:outline focus:outline-black">
-            8
-          </selectable.button>
-          <selectable.button className="p-4 bg-red-600 focus:bg-white focus:outline focus:outline-black">
-            9
-          </selectable.button>
-        </div>
-      </SelectableGroup>
-      <div className="mt-16"></div>
-      <SelectableGroup enteringPolicy={EnteringPolicy.Left}>
-        <h1 className="text-4xl mb-4">Pour vous</h1>
-        <div className="flex flex-row gap-8">
-          <selectable.button className="w-full p-4 bg-red-600 focus:bg-white focus:outline focus:outline-black">
-            10
-          </selectable.button>
-          <selectable.button className="w-full p-4 bg-red-600 focus:bg-white focus:outline focus:outline-black">
-            11
-          </selectable.button>
-          <selectable.button className="w-full p-4 bg-red-600 focus:bg-white focus:outline focus:outline-black">
-            12
-          </selectable.button>
-          <selectable.button className="w-full p-4 bg-red-600 focus:bg-white focus:outline focus:outline-black">
-            13
-          </selectable.button>
-          <selectable.button className="w-full p-4 bg-red-600 focus:bg-white focus:outline focus:outline-black">
-            14
-          </selectable.button>
-          <selectable.button className="w-full p-4 bg-red-600 focus:bg-white focus:outline focus:outline-black">
-            15
-          </selectable.button>
-          <selectable.button className="w-full p-4 bg-red-600 focus:bg-white focus:outline focus:outline-black">
-            16
-          </selectable.button>
-          <selectable.button className="w-full p-4 bg-red-600 focus:bg-white focus:outline focus:outline-black">
-            17
-          </selectable.button>
-          <selectable.button className="w-full p-4 bg-red-600 focus:bg-white focus:outline focus:outline-black">
-            18
-          </selectable.button>
-        </div>
-      </SelectableGroup>
+      <NavBar />
+      <div className="mt-8 w-full max-w-[1400px] p-4 mx-auto flex flex-col gap-8">
+        <MovieCategory label="En ce moment sur OQEE Ciné">
+          {Array.from({ length: 20 }).map((_, index) => (
+            <selectable.div
+              key={index}
+              className="h-44 aspect-[1/1.5] bg-red-600 rounded-xl focus:outline-4 focus:outline-white transition-all focus:scale-105"
+            />
+          ))}
+        </MovieCategory>
+        <MovieCategory label="Vos genres préférés">
+          {Array.from({ length: 7 }).map((_, index) => (
+            <selectable.div
+              key={index}
+              className="h-60 aspect-video bg-red-600 rounded-xl focus:outline-4 focus:outline-white transition-all focus:scale-105"
+            />
+          ))}
+        </MovieCategory>
+        <MovieCategory label="Les 20 plus vus de 2024">
+          {Array.from({ length: 20 }).map((_, index) => (
+            <selectable.div
+              key={index}
+              className="h-44 aspect-[1/1.5] bg-red-600 rounded-xl focus:outline-4 focus:outline-white transition-all focus:scale-105"
+            />
+          ))}
+        </MovieCategory>
+      </div>
     </SelectionController>
   )
 }

@@ -1,8 +1,9 @@
 import { RefObject } from 'react'
 import { EnteringPolicy } from './group/entering-policy'
+import { EventHandlers } from './EventManager'
 
 export type SelectableType = {
-  ref: RefObject<HTMLElement>
+  ref: RefObject<HTMLElement | null>
   id: string
   enteringPolicy?: EnteringPolicy
   groupId: string
@@ -15,4 +16,6 @@ export type SelectableType = {
 export type SelectableGroupType = {
   id: string
   enteringPolicy: EnteringPolicy
+  onElementFocused?: NonNullable<EventHandlers['onElementFocused']>[number]
+  onGroupLeaved?: NonNullable<EventHandlers['onGroupLeaved']>[number]
 }

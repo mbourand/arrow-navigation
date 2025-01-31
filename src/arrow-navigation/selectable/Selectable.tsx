@@ -4,9 +4,9 @@ import { SelectableGroupContext } from '../group/GroupContext'
 import { useSelectable } from './useSelectable'
 
 export type SelectableProps = {
-  As: string | FC<PropsWithChildren & { ref: RefObject<HTMLElement>; id: string }>
+  As: string | FC<PropsWithChildren & { ref: RefObject<HTMLElement | null>; id: string }>
   props?: object
-  children: ReactNode
+  children?: ReactNode
   id?: string
 } & Omit<SelectableType, 'ref' | 'groupId' | 'id'>
 
@@ -26,7 +26,7 @@ export const Selectable = ({
 
   const usedId = id ?? reactId
 
-  const ref = useRef(null)
+  const ref = useRef<HTMLElement>(null)
 
   useSelectable({ ref, groupId: groupContext.groupId, id: usedId, nextDown, nextUp, nextRight, nextLeft })
 
