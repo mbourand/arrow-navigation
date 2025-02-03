@@ -39,7 +39,9 @@ export const SelectionController = ({ children, initialFocusedId }: SelectionCon
   const focusElement = (selectable: SelectableType) => {
     const elementThatWasFocused = focusedIdRef.current ? selectablesRef.current.get(focusedIdRef.current) : null
 
-    selectable.ref.current?.focus()
+    selectable.ref.current?.focus({ preventScroll: true })
+    const selectableGroup = groupsRef.current.get(selectable.groupId)
+    if (selectableGroup) selectableGroup.lastSelectedElementId = selectable.id
     focusedIdRef.current = selectable.id
 
     eventManager.emit('onElementFocused', selectable)
@@ -47,6 +49,16 @@ export const SelectionController = ({ children, initialFocusedId }: SelectionCon
     if (elementThatWasFocused?.groupId && elementThatWasFocused.groupId !== selectable.groupId) {
       const unfocusedGroup = groupsRef.current.get(elementThatWasFocused.groupId)
       if (unfocusedGroup) eventManager.emit('onGroupLeaved', unfocusedGroup)
+    }
+
+    const selectablePos = selectable.ref.current?.getBoundingClientRect()
+    if (selectablePos) {
+      if (selectablePos.bottom > window.innerHeight * 0.75 || selectablePos.top < window.innerHeight * 0.25) {
+        window.scrollTo({
+          top: selectablePos.top + selectablePos.height / 2 + window.scrollY - window.innerHeight / 2,
+          behavior: 'smooth',
+        })
+      }
     }
   }
 
@@ -114,7 +126,7 @@ export const SelectionController = ({ children, initialFocusedId }: SelectionCon
           )
           if (groupToFocus) {
             const elementToFocusFromPolicy = getFirstElementToFocus(
-              groupToFocus.enteringPolicy,
+              groupToFocus,
               filterUntruthy(selectablesFromGroup.map((s) => s.ref.current)),
               currentFocus.ref.current
             )
@@ -138,6 +150,11 @@ export const SelectionController = ({ children, initialFocusedId }: SelectionCon
   }
 
   const onKeyDown = (e: KeyboardEvent) => {
+    if (!isKeyOf(KEY_CODE_TO_DIRECTIONS, e.code)) {
+      return
+    }
+
+    e.preventDefault()
     if (!focusedIdRef.current) {
       const firstElement = selectablesRef.current.values().next().value
       if (firstElement) focusElement(firstElement)

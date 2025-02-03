@@ -1,3 +1,5 @@
+import { SelectableGroupType } from '../types'
+
 export enum EnteringPolicy {
   FromDirection = 'FromDirection',
   Top = 'Top',
@@ -8,6 +10,7 @@ export enum EnteringPolicy {
   TopRight = 'TopRight',
   BottomLeft = 'BottomLeft',
   BottomRight = 'BottomRight',
+  Last = 'Last',
 }
 
 const getNearestElement = (elements: HTMLElement[], position: { x: number; y: number }) => {
@@ -29,7 +32,7 @@ const getNearestElement = (elements: HTMLElement[], position: { x: number; y: nu
 }
 
 export const getFirstElementToFocus = (
-  enteringPolicy: EnteringPolicy,
+  group: SelectableGroupType,
   elements: HTMLElement[],
   currentElement: HTMLElement
 ): HTMLElement | null => {
@@ -37,7 +40,7 @@ export const getFirstElementToFocus = (
   const currentCenter = { x: currentRect.left + currentRect.width / 2, y: currentRect.top + currentRect.height / 2 }
   const withoutSelf = elements.filter((element) => element.id !== currentElement.id)
 
-  switch (enteringPolicy) {
+  switch (group.enteringPolicy) {
     case EnteringPolicy.FromDirection:
       return getNearestElement(withoutSelf, currentCenter)
     case EnteringPolicy.Top:
@@ -56,5 +59,7 @@ export const getFirstElementToFocus = (
       return getNearestElement(withoutSelf, { x: -999999, y: 999999 })
     case EnteringPolicy.BottomRight:
       return getNearestElement(withoutSelf, { x: 999999, y: 999999 })
+    case EnteringPolicy.Last:
+      return elements.find((element) => element.id === group.lastSelectedElementId) ?? elements[0]
   }
 }

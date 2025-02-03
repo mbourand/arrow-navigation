@@ -16,6 +16,7 @@ export type SelectableType = {
 export type SelectableGroupType = {
   id: string
   enteringPolicy: EnteringPolicy
+  lastSelectedElementId?: string
   onElementFocused?: NonNullable<EventHandlers['onElementFocused']>[number]
   onGroupLeaved?: NonNullable<EventHandlers['onGroupLeaved']>[number]
 }

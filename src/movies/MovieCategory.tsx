@@ -16,12 +16,15 @@ export const MovieCategory = ({ label, children, className }: MovieCategoryProps
       <h1 className="text-2xl">{label}</h1>
       <group.div
         ref={divRef}
-        onGroupLeaved={() => divRef.current?.scrollTo({ left: 0, behavior: 'smooth' })}
-        onElementFocused={(selectable) =>
-          selectable.ref.current?.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' })
-        }
-        enteringPolicy={EnteringPolicy.Left}
-        className="flex p-4 flex-row gap-4 w-[calc(100%_+_16px)] overflow-x-hidden -translate-x-4 -pr-4"
+        onElementFocused={(selectable) => {
+          if (!selectable.ref.current) return
+          divRef.current?.scrollTo({
+            left: selectable.ref.current.offsetLeft - divRef.current.getBoundingClientRect().width * 0.5,
+            behavior: 'smooth',
+          })
+        }}
+        enteringPolicy={EnteringPolicy.Last}
+        className="flex flex-row gap-4 py-4 pl-4 -ml-4 overflow-x-hidden w-full"
       >
         {children}
       </group.div>
