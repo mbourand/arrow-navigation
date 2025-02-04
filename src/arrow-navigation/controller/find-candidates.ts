@@ -1,4 +1,4 @@
-import { SelectableType } from '../types'
+import { SelectableGroupType, SelectableType } from '../types'
 
 export const ComparisonDirection = {
   TOWARDS_NEGATIVE: -1,
@@ -17,19 +17,25 @@ export type DirectionDataType = {
 export const findCandidates = (
   selectables: SelectableType[],
   currentFocus: SelectableType,
+  currentFocusGroup: SelectableGroupType,
   selectionDirectionData: DirectionDataType
 ) => {
   const currentFocusPosition = currentFocus.ref.current?.getBoundingClientRect()
   if (!currentFocusPosition) return []
 
+  const currentGroupPos = currentFocusGroup.ref?.current?.getBoundingClientRect()
+
   return selectables.filter((candidate) => {
     if (!candidate.ref.current) return false
     if (candidate.id === currentFocus.id) return false
 
+    const basePositionToUse =
+      candidate.groupId === currentFocus.groupId ? currentFocusPosition : currentGroupPos ?? currentFocusPosition
+
     const rect = candidate.ref.current.getBoundingClientRect()
 
-    const xCoordinateOverlap = currentFocusPosition.right >= rect.left && currentFocusPosition.left <= rect.right
-    const yCoordinateOverlap = currentFocusPosition.bottom >= rect.top && currentFocusPosition.top <= rect.bottom
+    const xCoordinateOverlap = basePositionToUse.right >= rect.left && basePositionToUse.left <= rect.right
+    const yCoordinateOverlap = basePositionToUse.bottom >= rect.top && basePositionToUse.top <= rect.bottom
 
     // Possible improvement here by also checking for overlap with candidate's group if it is not the same as the current group
     // This should allow to focus on a group that overlap even if the selectable we are checking is not overlapping
@@ -38,7 +44,7 @@ export const findCandidates = (
 
     return (
       rect[selectionDirectionData.edgeToCompareWith] * selectionDirectionData.comparisonDirection >
-      currentFocusPosition[selectionDirectionData.edge] * selectionDirectionData.comparisonDirection
+      basePositionToUse[selectionDirectionData.edge] * selectionDirectionData.comparisonDirection
     )
   })
 }

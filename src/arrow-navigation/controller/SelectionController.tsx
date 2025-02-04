@@ -99,11 +99,12 @@ export const SelectionController = ({ children, initialFocusedId }: SelectionCon
     const directionData = KEY_CODE_TO_DIRECTIONS[code]
     const currentFocusElement = currentFocus.ref.current
     const currentFocusPosition = currentFocusElement?.getBoundingClientRect()
-    if (!currentFocusElement || !currentFocusPosition) return false
+    const currentFocusGroup = groupsRef.current.get(currentFocus.groupId)
+    if (!currentFocusElement || !currentFocusPosition || !currentFocusGroup) return false
 
     const selectablesArray = Array.from(selectables.values())
 
-    const candidates = findCandidates(selectablesArray, currentFocus, directionData)
+    const candidates = findCandidates(selectablesArray, currentFocus, currentFocusGroup, directionData)
     const bestCandidate = findBestCandidate(candidates, currentFocus, directionData)
     if (!bestCandidate) return false
 
