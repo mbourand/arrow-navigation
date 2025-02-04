@@ -115,7 +115,25 @@ export const SelectionController = ({ children, initialFocusedId }: SelectionCon
         const distanceSq = distanceOnMainAxis ** 2 + distanceOnSecondAxis ** 2
 
         if (!best) return { item: candidate, distance: distanceSq }
-        return distanceSq < best.distance ? { item: candidate, distance: distanceSq } : best
+
+        if (distanceSq >= best.distance) return best
+
+        const pointsToCheckVisibility = [
+          { x: candidateRect.left, y: candidateRect.top },
+          { x: candidateRect.right, y: candidateRect.top },
+          { x: candidateRect.left, y: candidateRect.bottom },
+          { x: candidateRect.right, y: candidateRect.bottom },
+          { x: candidateRect.left + candidateRect.width / 2, y: candidateRect.top + candidateRect.height / 2 },
+          { x: candidateRect.left + candidateRect.width / 2, y: candidateRect.top },
+          { x: candidateRect.left + candidateRect.width / 2, y: candidateRect.bottom },
+          { x: candidateRect.left, y: candidateRect.top + candidateRect.height / 2 },
+          { x: candidateRect.right, y: candidateRect.top + candidateRect.height / 2 },
+        ]
+
+        const isVisible = pointsToCheckVisibility.some(
+          (point) => document.elementFromPoint(point.x, point.y) === candidate.ref.current
+        )
+        return isVisible ? { item: candidate, distance: distanceSq } : best
       }, null as { item: SelectableType; distance: number } | null)
 
       if (bestCandidate) {

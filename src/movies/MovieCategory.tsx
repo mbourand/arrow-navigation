@@ -23,8 +23,8 @@ export const MovieCategory = ({ label, children, className }: MovieCategoryProps
             behavior: 'smooth',
           })
         }}
-        enteringPolicy={EnteringPolicy.Last}
-        className="flex flex-row gap-4 py-4 pl-4 -ml-4 overflow-x-hidden w-full"
+        enteringPolicy={EnteringPolicy.Left}
+        className="flex flex-row gap-4 py-4 px-4 -mx-4 overflow-x-hidden w-full"
       >
         {children}
       </group.div>
