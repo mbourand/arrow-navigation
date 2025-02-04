@@ -10,40 +10,54 @@ export type EventType =
 
 export type EventHandlers = {
   // Registering events
-  elementRegistered?: ((selectable: SelectableType) => void)[]
-  elementUnregistered?: ((id: string) => void)[]
-  groupRegistered?: ((group: SelectableGroupType) => void)[]
-  groupUnregistered?: ((id: string) => void)[]
+  elementRegistered: (selectable: SelectableType) => void
+  elementUnregistered: (id: string) => void
+  groupRegistered: (group: SelectableGroupType) => void
+  groupUnregistered: (id: string) => void
 
   // Focus events
-  onElementFocused?: ((selectable: SelectableType) => void)[]
-  onGroupLeaved?: ((group: SelectableGroupType) => void)[]
+  onElementFocused: (selectable: SelectableType) => void
+  onGroupLeaved: (group: SelectableGroupType) => void
+}
+
+type EventHandlersArray = {
+  [K in keyof EventHandlers]?: {
+    fn: EventHandlers[K]
+    signal: AbortSignal
+    abortListenerController: AbortController
+  }[]
 }
 
 export class ArrowNavigationEventManager {
-  private listeners: EventHandlers = {}
+  private eventHandlers: EventHandlersArray = {}
 
-  on = <T extends EventType>(event: T, listener: NonNullable<EventHandlers[T]>[number]) => {
-    if (!this.listeners[event]) {
-      this.listeners[event] = []
-    }
+  on = <T extends EventType>(event: T, listener: EventHandlers[T], signal: AbortSignal) => {
+    this.eventHandlers[event] ??= []
 
-    this.listeners[event].push(listener as never)
+    const abortController = new AbortController()
+    // As never is fine here because the type is checked via the parameter type
+    this.eventHandlers[event].push({ fn: listener as never, signal, abortListenerController: abortController })
+
+    signal.addEventListener('abort', () => this.off(event, listener), { signal: abortController.signal })
   }
 
-  off = <T extends EventType>(event: T, listener: NonNullable<EventHandlers[T]>[number]) => {
-    if (!this.listeners[event]) {
-      return
-    }
+  off = <T extends EventType>(event: T, listener: EventHandlers[T]) => {
+    if (!this.eventHandlers[event]) return
 
-    this.listeners[event] = this.listeners[event].filter((l) => l !== listener) as never
+    const indicesToRemove = this.eventHandlers[event]
+      .map((handler, i) => (handler.fn === listener ? i : null))
+      .filter((i) => i !== null)
+
+    for (const index of indicesToRemove) {
+      this.eventHandlers[event][index].abortListenerController.abort()
+      this.eventHandlers[event].splice(index, 1)
+    }
   }
 
-  emit = <T extends EventType>(event: T, ...args: Parameters<NonNullable<EventHandlers[T]>[number]>) => {
-    if (!this.listeners[event]) {
-      return
-    }
+  emit = <T extends EventType>(event: T, ...args: Parameters<EventHandlers[T]>) => {
+    if (!this.eventHandlers[event]) return
 
-    this.listeners[event].forEach((listener) => (listener as (...args: unknown[]) => unknown)(...args))
+    // Casting is fine here because parameter validity is checked via the type of args
+    this.eventHandlers[event].forEach((handler) => (handler.fn as (...args: unknown[]) => unknown)(...args))
   }
 }

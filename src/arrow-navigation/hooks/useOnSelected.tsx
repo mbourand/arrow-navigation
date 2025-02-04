@@ -3,11 +3,13 @@ import { EventHandlers } from '../EventManager'
 import { useShallow } from 'zustand/shallow'
 import { useArrowNavigationStore } from '../store'
 
-export const useOnFocus = (callback: NonNullable<EventHandlers['onElementFocused']>[number]) => {
+export const useOnFocus = (callback: EventHandlers['onElementFocused']) => {
   const { eventManager } = useArrowNavigationStore(useShallow(({ eventManager }) => ({ eventManager })))
 
   useEffect(() => {
-    eventManager.on('onElementFocused', callback)
-    return () => eventManager.off('onElementFocused', callback)
+    const abortController = new AbortController()
+    eventManager.on('onElementFocused', callback, abortController.signal)
+
+    return () => abortController.abort()
   }, [callback, eventManager])
 }

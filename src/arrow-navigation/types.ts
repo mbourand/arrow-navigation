@@ -7,16 +7,13 @@ export type SelectableType = {
   id: string
   enteringPolicy?: EnteringPolicy
   groupId: string
-  nextDown?: string
-  nextLeft?: string
-  nextRight?: string
-  nextUp?: string
 }
 
 export type SelectableGroupType = {
+  ref?: RefObject<HTMLElement | null>
   id: string
   enteringPolicy: EnteringPolicy
   lastSelectedElementId?: string
-  onElementFocused?: NonNullable<EventHandlers['onElementFocused']>[number]
-  onGroupLeaved?: NonNullable<EventHandlers['onGroupLeaved']>[number]
+  onElementFocused?: EventHandlers['onElementFocused']
+  onGroupLeaved?: EventHandlers['onGroupLeaved']
 }

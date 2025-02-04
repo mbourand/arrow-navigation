@@ -27,13 +27,13 @@ export const useSelectableGroup = (group: SelectableGroupType) => {
   )
 
   useEffect(() => {
-    eventManager.on('onElementFocused', onAnyElementFocused)
-    eventManager.on('onGroupLeaved', onAnyGroupLeaved)
+    const abortController = new AbortController()
+    eventManager.on('onElementFocused', onAnyElementFocused, abortController.signal)
+    eventManager.on('onGroupLeaved', onAnyGroupLeaved, abortController.signal)
     registerSelectableGroup(group)
 
     return () => {
-      eventManager.off('onElementFocused', onAnyElementFocused)
-      eventManager.off('onGroupLeaved', onAnyGroupLeaved)
+      abortController.abort()
       unregisterSelectableGroup(group.id)
     }
   }, [eventManager, group, onAnyElementFocused, onAnyGroupLeaved, registerSelectableGroup, unregisterSelectableGroup])

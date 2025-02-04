@@ -10,16 +10,7 @@ export type SelectableProps = {
   id?: string
 } & Omit<SelectableType, 'ref' | 'groupId' | 'id'>
 
-export const Selectable = ({
-  As,
-  children,
-  id,
-  nextDown,
-  nextLeft,
-  nextRight,
-  nextUp,
-  props = {},
-}: SelectableProps) => {
+export const Selectable = ({ As, children, id, props = {} }: SelectableProps) => {
   const reactId = useId()
   const groupContext = useContext(SelectableGroupContext) ?? { groupId: '' }
   if (!groupContext) throw new Error('Selectable component must be a child of SelectableGroup')
@@ -28,7 +19,7 @@ export const Selectable = ({
 
   const ref = useRef<HTMLElement>(null)
 
-  useSelectable({ ref, groupId: groupContext.groupId, id: usedId, nextDown, nextUp, nextRight, nextLeft })
+  useSelectable({ ref, groupId: groupContext.groupId, id: usedId })
 
   return (
     <As id={usedId} ref={ref} {...props}>

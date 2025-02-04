@@ -28,7 +28,7 @@ export const SelectableGroup = ({
   const reactId = useId()
   const usedId = id ?? reactId
 
-  useSelectableGroup({ id: usedId, enteringPolicy, onElementFocused, onGroupLeaved })
+  useSelectableGroup({ ref, id: usedId, enteringPolicy, onElementFocused, onGroupLeaved })
 
   return (
     <SelectableGroupContext.Provider value={{ groupId: usedId }}>
