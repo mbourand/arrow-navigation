@@ -80,5 +80,5 @@ export const findBestCandidate = (
   if (!bestRegion) return bestSelectable?.item.id
   if (!bestSelectable) return bestRegion?.item.id
 
-  return bestSelectable.distance <= bestRegion.distance ? bestRegion.item.id : bestRegion.item.id
+  return bestSelectable.distance <= bestRegion.distance ? bestSelectable.item.id : bestRegion.item.id
 }
