@@ -1,4 +1,4 @@
-import { FC, PropsWithChildren, ReactNode, RefObject, useId } from 'react'
+import { FC, PropsWithChildren, ReactNode, RefObject, useId, useRef } from 'react'
 import { SelectableGroupContext } from './GroupContext'
 import { useSelectableGroup } from './useSelectableGroup'
 import { EnteringPolicy } from './entering-policy'
@@ -28,12 +28,16 @@ export const SelectableGroup = ({
   const reactId = useId()
   const usedId = id ?? reactId
 
-  useSelectableGroup({ ref, id: usedId, enteringPolicy, onElementFocused, onGroupLeaved })
+  const baseRef = useRef<HTMLElement>(null)
+
+  const usedRef = ref ?? baseRef
+
+  useSelectableGroup({ ref: usedRef, id: usedId, enteringPolicy, onElementFocused, onGroupLeaved })
 
   return (
     <SelectableGroupContext.Provider value={{ groupId: usedId }}>
       {As ? (
-        <As id={usedId} ref={ref} {...props}>
+        <As id={usedId} ref={usedRef} {...props}>
           {children}
         </As>
       ) : (

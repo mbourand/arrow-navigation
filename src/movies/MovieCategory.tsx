@@ -23,7 +23,7 @@ export const MovieCategory = ({ label, children, className }: MovieCategoryProps
             behavior: 'smooth',
           })
         }}
-        enteringPolicy={EnteringPolicy.Left}
+        enteringPolicy={EnteringPolicy.Last}
         className="flex flex-row gap-4 py-4 px-4 -mx-4 overflow-x-hidden w-full"
       >
         {children}

@@ -17,7 +17,7 @@ const getNearestElement = (elements: HTMLElement[], position: { x: number; y: nu
   let minDistance = Infinity
   let nearestElement: HTMLElement | null = null
 
-  elements.forEach((element) => {
+  for (const element of elements) {
     const rect = element.getBoundingClientRect()
     const center = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 }
     const distance = Math.sqrt((position.x - center.x) ** 2 + (position.y - center.y) ** 2)
@@ -26,7 +26,7 @@ const getNearestElement = (elements: HTMLElement[], position: { x: number; y: nu
       minDistance = distance
       nearestElement = element
     }
-  })
+  }
 
   return nearestElement
 }

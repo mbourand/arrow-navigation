@@ -103,17 +103,26 @@ export const SelectionController = ({ children, initialFocusedId }: SelectionCon
     if (!currentFocusElement || !currentFocusPosition || !currentFocusGroup) return false
 
     const selectablesArray = Array.from(selectables.values())
+    const groupsArray = Array.from(groupsRef.current.values())
 
-    const candidates = findCandidates(selectablesArray, currentFocus, currentFocusGroup, directionData)
-    const bestCandidate = findBestCandidate(candidates, currentFocus, directionData)
-    if (!bestCandidate) return false
+    const candidates = findCandidates(selectablesArray, groupsArray, currentFocus, currentFocusGroup, directionData)
+    const bestCandidateId = findBestCandidate(candidates.selectables, candidates.groups, currentFocus)
+    if (!bestCandidateId) return false
 
-    if (bestCandidate.item.groupId !== currentFocus.groupId) {
-      const groupToFocus = groupsRef.current.get(bestCandidate.item.groupId)
+    if (groupsRef.current.has(bestCandidateId)) {
+      const bestCandidateGroup = groupsRef.current.get(bestCandidateId)
+      return bestCandidateGroup && tryFocusFromEnteringPolicy(selectablesArray, bestCandidateGroup, currentFocusElement)
+    }
+
+    const bestCandidateSelectable = selectables.get(bestCandidateId)
+    if (!bestCandidateSelectable) return false
+
+    if (bestCandidateSelectable.groupId !== currentFocus.groupId) {
+      const groupToFocus = groupsRef.current.get(bestCandidateSelectable.groupId)
       if (groupToFocus && tryFocusFromEnteringPolicy(selectablesArray, groupToFocus, currentFocusElement)) return true
     }
 
-    focusTo(bestCandidate.item)
+    focusTo(bestCandidateSelectable)
     return true
   }
 
