@@ -10,7 +10,7 @@ function App() {
       <NavBar />
       <div className="w-full max-w-[1400px] p-4 mx-auto mt-8">
         <div className="w-full flex flex-col gap-8">
-          <region.div id="testeeee" className="w-full flex flex-row gap-4">
+          <region.div className="w-full flex flex-row gap-4">
             <selectable.div className="w-32 h-6 rounded-full focus:outline-4 focus:outline-white bg-neutral-700" />
             <selectable.div className="w-32 h-6 rounded-full focus:outline-4 focus:outline-white bg-neutral-700" />
             <selectable.div className="w-32 h-6 rounded-full focus:outline-4 focus:outline-white bg-neutral-700" />
