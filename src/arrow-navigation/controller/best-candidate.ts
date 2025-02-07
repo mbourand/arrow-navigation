@@ -68,17 +68,17 @@ const nearestVisibleCandidate = <T extends SelectableType | SelectableRegionType
 
 export const findBestCandidate = (
   selectableCandidates: SelectableType[],
-  groupCandidates: SelectableRegionType[],
+  regionCandidates: SelectableRegionType[],
   currentFocus: SelectableType
 ) => {
   const currentFocusPosition = currentFocus.ref.current?.getBoundingClientRect()
   if (!currentFocusPosition) return null
 
   const bestSelectable = nearestVisibleCandidate(selectableCandidates, currentFocusPosition)
-  const bestGroup = nearestVisibleCandidate(groupCandidates, currentFocusPosition)
+  const bestRegion = nearestVisibleCandidate(regionCandidates, currentFocusPosition)
 
-  if (!bestGroup) return bestSelectable?.item.id
-  if (!bestSelectable) return bestGroup?.item.id
+  if (!bestRegion) return bestSelectable?.item.id
+  if (!bestSelectable) return bestRegion?.item.id
 
-  return bestSelectable.distance <= bestGroup.distance ? bestGroup.item.id : bestGroup.item.id
+  return bestSelectable.distance <= bestRegion.distance ? bestRegion.item.id : bestRegion.item.id
 }

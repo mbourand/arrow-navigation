@@ -1,6 +1,6 @@
 import { HTMLAttributes } from 'react'
-import { SelectableRegion } from './SelectableGroup'
-import { useSelectableRegion as useSelectableRegion } from './useSelectableGroup'
+import { SelectableRegion } from './SelectableRegion'
+import { useSelectableRegion as useSelectableRegion } from './useSelectableRegion'
 import { SelectableRegionType } from '../types'
 import { MakeOptional } from '../../utils/types'
 
