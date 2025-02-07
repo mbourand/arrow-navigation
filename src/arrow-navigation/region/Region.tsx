@@ -8,7 +8,7 @@ type Props<T extends HTMLElement> = MakeOptional<SelectableRegionType<T>, 'enter
   HTMLAttributes<T>
 
 const RegionDiv = (props: Props<HTMLDivElement>) => {
-  const { region, props: propsToOverride } = useSelectableRegion<HTMLDivElement>(props)
+  const { region, props: propsToOverride } = useSelectableRegion(props)
 
   return (
     <SelectableRegion id={region.id}>
@@ -20,7 +20,7 @@ const RegionDiv = (props: Props<HTMLDivElement>) => {
 }
 
 const RegionNav = (props: Props<HTMLElement>) => {
-  const { region, props: propsToOverride } = useSelectableRegion<HTMLElement>(props)
+  const { region, props: propsToOverride } = useSelectableRegion(props)
 
   return (
     <SelectableRegion id={region.id}>

@@ -37,13 +37,12 @@ const isValidCandidate = (
   const xCoordinateOverlap = basePositionToUse.right >= rect.left && basePositionToUse.left <= rect.right
   const yCoordinateOverlap = basePositionToUse.bottom >= rect.top && basePositionToUse.top <= rect.bottom
 
-  if (selectionDirectionData.axis === 'x' && !yCoordinateOverlap) return false
-  else if (selectionDirectionData.axis === 'y' && !xCoordinateOverlap) return false
+  const { axis, edgeToCompareWith, comparisonDirection, edge } = selectionDirectionData
 
-  return (
-    rect[selectionDirectionData.edgeToCompareWith] * selectionDirectionData.comparisonDirection >
-    basePositionToUse[selectionDirectionData.edge] * selectionDirectionData.comparisonDirection
-  )
+  if (axis === 'x' && !yCoordinateOverlap) return false
+  else if (axis === 'y' && !xCoordinateOverlap) return false
+
+  return rect[edgeToCompareWith] * comparisonDirection > basePositionToUse[edge] * comparisonDirection
 }
 
 export const findCandidates = (

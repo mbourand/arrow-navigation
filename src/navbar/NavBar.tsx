@@ -12,7 +12,7 @@ export const NavBar = () => {
     <region.nav className="px-8 py-4 bg-[#1c1c1c] shadow-md">
       <div className="w-full max-w-[1400px] flex flex-row justify-between mx-auto">
         <div className="flex flex-row items-center gap-8 text-neutral-400 font-semibold text-base">
-          <img src="https://oqee.tv/img/zrgzrg-by-free1.svg" className="h-[35px] mr-4" alt="" />
+          <img src="https://oqee.tv/img/oqee-by-free1.svg" className="h-[35px] mr-4" alt="" />
           {tabs.map((tab, index) => (
             <NavButton key={index} label={tab} isSelected={selected === tab} onClick={() => setSelected(tab)} />
           ))}

@@ -72,29 +72,27 @@ export const SelectionController = ({ children, initialFocusedId }: SelectionCon
   }
 
   const tryFocusFromEnteringPolicy = (
-    selectables: SelectableType[],
+    candidates: SelectableType[],
     region: SelectableRegionType,
     currentFocusElement: HTMLElement
   ) => {
-    const elementToFocusFromPolicy = getFirstElementToFocus(
-      region,
-      filterUntruthy(selectables.filter((s) => s.regionId === region.id).map((s) => s.ref.current)),
-      currentFocusElement
-    )
-
+    const candidateElems = filterUntruthy(candidates.filter((s) => s.regionId === region.id).map((s) => s.ref.current))
+    const elementToFocusFromPolicy = getFirstElementToFocus(region, candidateElems, currentFocusElement)
     if (!elementToFocusFromPolicy) return false
 
-    const selectable = selectables.find((s) => s.id === elementToFocusFromPolicy.id)
+    const selectable = candidates.find((s) => s.id === elementToFocusFromPolicy.id)
     if (!selectable) return false
 
     focusTo(selectable)
     return true
   }
 
-  const tryFocus = (currentFocus: SelectableType, code: string, selectables: Map<string, SelectableType>) => {
-    if (!isKeyOf(KEY_CODE_TO_DIRECTIONS, code)) {
-      return false
-    }
+  const focusToBestSelectable = (
+    currentFocus: SelectableType,
+    code: string,
+    selectables: Map<string, SelectableType>
+  ) => {
+    if (!isKeyOf(KEY_CODE_TO_DIRECTIONS, code)) return false
 
     const directionData = KEY_CODE_TO_DIRECTIONS[code]
     const currentFocusElement = currentFocus.ref.current
@@ -109,15 +107,14 @@ export const SelectionController = ({ children, initialFocusedId }: SelectionCon
     const bestCandidateId = findBestCandidate(candidates.selectables, candidates.regions, currentFocus)
     if (!bestCandidateId) return false
 
-    if (regionsRef.current.has(bestCandidateId)) {
-      const bestCandidateRegion = regionsRef.current.get(bestCandidateId)
-      return (
-        bestCandidateRegion && tryFocusFromEnteringPolicy(selectablesArray, bestCandidateRegion, currentFocusElement)
-      )
-    }
+    const bestCandidateRegion = regionsRef.current.get(bestCandidateId)
+    const bestCandidateIsRegion = !!bestCandidateRegion
+    if (bestCandidateIsRegion)
+      return tryFocusFromEnteringPolicy(selectablesArray, bestCandidateRegion, currentFocusElement)
 
     const bestCandidateSelectable = selectables.get(bestCandidateId)
-    if (!bestCandidateSelectable) return false
+    const bestCandidateIsSelectable = !!bestCandidateSelectable
+    if (!bestCandidateIsSelectable) return false
 
     if (bestCandidateSelectable.regionId !== currentFocus.regionId) {
       const regionToFocus = regionsRef.current.get(bestCandidateSelectable.regionId)
@@ -132,19 +129,17 @@ export const SelectionController = ({ children, initialFocusedId }: SelectionCon
     if (!isKeyOf(KEY_CODE_TO_DIRECTIONS, e.code)) return
 
     e.preventDefault()
+
     if (!focusedIdRef.current) {
       const firstElement = selectablesRef.current.values().next().value
       if (firstElement) focusTo(firstElement)
       return
     }
 
-    const focusedId = focusedIdRef.current
-    const selectables = selectablesRef.current
-
-    const currentlyFocusedElement = selectables.get(focusedId)
+    const currentlyFocusedElement = selectablesRef.current.get(focusedIdRef.current)
     if (!currentlyFocusedElement) return
 
-    if (tryFocus(currentlyFocusedElement, e.code, selectables)) return
+    focusToBestSelectable(currentlyFocusedElement, e.code, selectablesRef.current)
   }
 
   const onElementRegistered = (selectable: SelectableType) => selectablesRef.current.set(selectable.id, selectable)
