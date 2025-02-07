@@ -1,4 +1,4 @@
-import { SelectableGroupType } from '../types'
+import { SelectableRegionType } from '../types'
 
 export enum EnteringPolicy {
   FromDirection = 'FromDirection',
@@ -32,7 +32,7 @@ const getNearestElement = (elements: HTMLElement[], position: { x: number; y: nu
 }
 
 export const getFirstElementToFocus = (
-  group: SelectableGroupType,
+  region: SelectableRegionType,
   elements: HTMLElement[],
   currentElement: HTMLElement
 ): HTMLElement | null => {
@@ -40,7 +40,7 @@ export const getFirstElementToFocus = (
   const currentCenter = { x: currentRect.left + currentRect.width / 2, y: currentRect.top + currentRect.height / 2 }
   const withoutSelf = elements.filter((element) => element.id !== currentElement.id)
 
-  switch (group.enteringPolicy) {
+  switch (region.enteringPolicy) {
     case EnteringPolicy.FromDirection:
       return getNearestElement(withoutSelf, currentCenter)
     case EnteringPolicy.Top:
@@ -60,6 +60,6 @@ export const getFirstElementToFocus = (
     case EnteringPolicy.BottomRight:
       return getNearestElement(withoutSelf, { x: 999999, y: 999999 })
     case EnteringPolicy.Last:
-      return elements.find((element) => element.id === group.lastSelectedElementId) ?? elements[0]
+      return elements.find((element) => element.id === region.lastSelectedElementId) ?? elements[0]
   }
 }

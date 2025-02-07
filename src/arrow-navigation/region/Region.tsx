@@ -1,0 +1,37 @@
+import { HTMLAttributes } from 'react'
+import { SelectableRegion } from './SelectableGroup'
+import { useSelectableRegion as useSelectableRegion } from './useSelectableGroup'
+import { SelectableRegionType } from '../types'
+import { MakeOptional } from '../../utils/types'
+
+type Props<T extends HTMLElement> = MakeOptional<SelectableRegionType<T>, 'enteringPolicy' | 'id' | 'ref'> &
+  HTMLAttributes<T>
+
+const RegionDiv = (props: Props<HTMLDivElement>) => {
+  const { region, props: propsToOverride } = useSelectableRegion<HTMLDivElement>(props)
+
+  return (
+    <SelectableRegion id={region.id}>
+      <div {...props} {...propsToOverride}>
+        {props.children}
+      </div>
+    </SelectableRegion>
+  )
+}
+
+const RegionNav = (props: Props<HTMLElement>) => {
+  const { region, props: propsToOverride } = useSelectableRegion<HTMLElement>(props)
+
+  return (
+    <SelectableRegion id={region.id}>
+      <nav {...props} {...propsToOverride}>
+        {props.children}
+      </nav>
+    </SelectableRegion>
+  )
+}
+
+export const region = {
+  div: RegionDiv,
+  nav: RegionNav,
+}

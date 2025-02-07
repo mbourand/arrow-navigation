@@ -1,4 +1,4 @@
-import { SelectableGroupType, SelectableType } from '../types'
+import { SelectableRegionType, SelectableType } from '../types'
 
 export const ComparisonDirection = {
   TOWARDS_NEGATIVE: -1,
@@ -16,8 +16,8 @@ export type DirectionDataType = {
 
 const isValidCandidate = (
   currentFocus: SelectableType,
-  currentGroup: SelectableGroupType,
-  candidate: SelectableGroupType | SelectableType,
+  currentRegion: SelectableRegionType,
+  candidate: SelectableRegionType | SelectableType,
   selectionDirectionData: DirectionDataType
 ) => {
   if (!candidate.ref?.current) return false
@@ -28,17 +28,15 @@ const isValidCandidate = (
 
   const rect = candidate.ref.current.getBoundingClientRect()
 
-  const currentGroupPos = currentGroup.ref?.current?.getBoundingClientRect()
+  const currentRegionPos = currentRegion.ref?.current?.getBoundingClientRect()
 
-  const groupId = 'groupId' in candidate ? candidate.groupId : candidate.id
+  const regionId = 'regionId' in candidate ? candidate.regionId : candidate.id
   const basePositionToUse =
-    groupId === currentFocus.groupId ? currentFocusPosition : currentGroupPos ?? currentFocusPosition
+    regionId === currentFocus.regionId ? currentFocusPosition : currentRegionPos ?? currentFocusPosition
 
   const xCoordinateOverlap = basePositionToUse.right >= rect.left && basePositionToUse.left <= rect.right
   const yCoordinateOverlap = basePositionToUse.bottom >= rect.top && basePositionToUse.top <= rect.bottom
 
-  // Possible improvement here by also checking for overlap with candidate's group if it is not the same as the current group
-  // This should allow to focus on a group that overlap even if the selectable we are checking is not overlapping
   if (selectionDirectionData.axis === 'x' && !yCoordinateOverlap) return false
   else if (selectionDirectionData.axis === 'y' && !xCoordinateOverlap) return false
 
@@ -50,11 +48,11 @@ const isValidCandidate = (
 
 export const findCandidates = (
   selectables: SelectableType[],
-  groups: SelectableGroupType[],
+  regions: SelectableRegionType[],
   currentFocus: SelectableType,
-  currentGroup: SelectableGroupType,
+  currentRegion: SelectableRegionType,
   selectionDirectionData: DirectionDataType
 ) => ({
-  selectables: selectables.filter((e) => isValidCandidate(currentFocus, currentGroup, e, selectionDirectionData)),
-  groups: groups.filter((e) => isValidCandidate(currentFocus, currentGroup, e, selectionDirectionData)),
+  selectables: selectables.filter((e) => isValidCandidate(currentFocus, currentRegion, e, selectionDirectionData)),
+  regions: regions.filter((e) => isValidCandidate(currentFocus, currentRegion, e, selectionDirectionData)),
 })

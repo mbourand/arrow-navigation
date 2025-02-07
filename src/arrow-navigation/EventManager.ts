@@ -1,23 +1,23 @@
-import { SelectableGroupType, SelectableType } from './types'
+import { SelectableRegionType, SelectableType } from './types'
 
 export type EventType =
   | 'elementRegistered'
-  | 'groupRegistered'
+  | 'regionRegistered'
   | 'elementUnregistered'
-  | 'groupUnregistered'
+  | 'regionUnregistered'
   | 'onElementFocused'
-  | 'onGroupLeaved'
+  | 'onRegionLeaved'
 
 export type EventHandlers = {
   // Registering events
   elementRegistered: (selectable: SelectableType) => void
   elementUnregistered: (id: string) => void
-  groupRegistered: (group: SelectableGroupType) => void
-  groupUnregistered: (id: string) => void
+  regionRegistered: (region: SelectableRegionType) => void
+  regionUnregistered: (id: string) => void
 
   // Focus events
   onElementFocused: (selectable: SelectableType) => void
-  onGroupLeaved: (group: SelectableGroupType) => void
+  onRegionLeaved: (region: SelectableRegionType) => void
 }
 
 type EventHandlersArray = {

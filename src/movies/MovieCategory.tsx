@@ -1,6 +1,6 @@
 import { ReactNode, useRef } from 'react'
-import { group } from '../arrow-navigation/components/Groups'
-import { EnteringPolicy } from '../arrow-navigation/group/entering-policy'
+import { region } from '../arrow-navigation/region/Region'
+import { EnteringPolicy } from '../arrow-navigation/region/entering-policy'
 
 type MovieCategoryProps = {
   className?: string
@@ -14,7 +14,7 @@ export const MovieCategory = ({ label, children, className }: MovieCategoryProps
   return (
     <div className={className}>
       <h1 className="text-2xl">{label}</h1>
-      <group.div
+      <region.div
         ref={divRef}
         onElementFocused={(selectable) => {
           if (!selectable.ref.current) return
@@ -27,7 +27,7 @@ export const MovieCategory = ({ label, children, className }: MovieCategoryProps
         className="flex flex-row gap-4 py-4 px-4 -mx-4 overflow-x-hidden w-full"
       >
         {children}
-      </group.div>
+      </region.div>
     </div>
   )
 }

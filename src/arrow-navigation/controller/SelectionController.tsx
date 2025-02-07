@@ -1,11 +1,11 @@
 import { ReactNode, useLayoutEffect, useRef } from 'react'
 import { useArrowNavigationStore } from '../store'
 import { useShallow } from 'zustand/shallow'
-import { SelectableGroupType, SelectableType } from '../types'
+import { SelectableRegionType, SelectableType } from '../types'
 import { isKeyOf } from '../../utils/isKeyOf'
 import { filterUntruthy } from '../../utils/filterUntruthy'
-import { SelectableGroupContext } from '../group/GroupContext'
-import { getFirstElementToFocus } from '../group/entering-policy'
+import { SelectableRegionContext } from '../region/RegionContext'
+import { getFirstElementToFocus } from '../region/entering-policy'
 import { ComparisonDirection, DirectionDataType, findCandidates } from './find-candidates'
 import { findBestCandidate } from './best-candidate'
 import { autoScrollToElement } from './auto-scroll'
@@ -47,7 +47,7 @@ const KEY_CODE_TO_DIRECTIONS = {
 export const SelectionController = ({ children, initialFocusedId }: SelectionControllerProps) => {
   const focusedIdRef = useRef(initialFocusedId)
   const selectablesRef = useRef(new Map<string, SelectableType>())
-  const groupsRef = useRef(new Map<string, SelectableGroupType>())
+  const regionsRef = useRef(new Map<string, SelectableRegionType>())
 
   const { eventManager } = useArrowNavigationStore(useShallow((state) => state))
 
@@ -58,14 +58,14 @@ export const SelectionController = ({ children, initialFocusedId }: SelectionCon
     const elementThatWasFocused = focusedIdRef.current ? selectablesRef.current.get(focusedIdRef.current) : null
 
     selectableElement.focus({ preventScroll: true })
-    const selectableGroup = groupsRef.current.get(selectable.groupId)
-    if (selectableGroup) selectableGroup.lastSelectedElementId = selectable.id
+    const selectableRegion = regionsRef.current.get(selectable.regionId)
+    if (selectableRegion) selectableRegion.lastSelectedElementId = selectable.id
     focusedIdRef.current = selectable.id
 
     eventManager.emit('onElementFocused', selectable)
-    if (elementThatWasFocused?.groupId && elementThatWasFocused.groupId !== selectable.groupId) {
-      const unfocusedGroup = groupsRef.current.get(elementThatWasFocused.groupId)
-      if (unfocusedGroup) eventManager.emit('onGroupLeaved', unfocusedGroup)
+    if (elementThatWasFocused?.regionId && elementThatWasFocused.regionId !== selectable.regionId) {
+      const unfocusedRegion = regionsRef.current.get(elementThatWasFocused.regionId)
+      if (unfocusedRegion) eventManager.emit('onRegionLeaved', unfocusedRegion)
     }
 
     autoScrollToElement(selectableElement)
@@ -73,12 +73,12 @@ export const SelectionController = ({ children, initialFocusedId }: SelectionCon
 
   const tryFocusFromEnteringPolicy = (
     selectables: SelectableType[],
-    group: SelectableGroupType,
+    region: SelectableRegionType,
     currentFocusElement: HTMLElement
   ) => {
     const elementToFocusFromPolicy = getFirstElementToFocus(
-      group,
-      filterUntruthy(selectables.filter((s) => s.groupId === group.id).map((s) => s.ref.current)),
+      region,
+      filterUntruthy(selectables.filter((s) => s.regionId === region.id).map((s) => s.ref.current)),
       currentFocusElement
     )
 
@@ -99,27 +99,29 @@ export const SelectionController = ({ children, initialFocusedId }: SelectionCon
     const directionData = KEY_CODE_TO_DIRECTIONS[code]
     const currentFocusElement = currentFocus.ref.current
     const currentFocusPosition = currentFocusElement?.getBoundingClientRect()
-    const currentFocusGroup = groupsRef.current.get(currentFocus.groupId)
-    if (!currentFocusElement || !currentFocusPosition || !currentFocusGroup) return false
+    const currentFocusRegion = regionsRef.current.get(currentFocus.regionId)
+    if (!currentFocusElement || !currentFocusPosition || !currentFocusRegion) return false
 
     const selectablesArray = Array.from(selectables.values())
-    const groupsArray = Array.from(groupsRef.current.values())
+    const regionsArray = Array.from(regionsRef.current.values())
 
-    const candidates = findCandidates(selectablesArray, groupsArray, currentFocus, currentFocusGroup, directionData)
-    const bestCandidateId = findBestCandidate(candidates.selectables, candidates.groups, currentFocus)
+    const candidates = findCandidates(selectablesArray, regionsArray, currentFocus, currentFocusRegion, directionData)
+    const bestCandidateId = findBestCandidate(candidates.selectables, candidates.regions, currentFocus)
     if (!bestCandidateId) return false
 
-    if (groupsRef.current.has(bestCandidateId)) {
-      const bestCandidateGroup = groupsRef.current.get(bestCandidateId)
-      return bestCandidateGroup && tryFocusFromEnteringPolicy(selectablesArray, bestCandidateGroup, currentFocusElement)
+    if (regionsRef.current.has(bestCandidateId)) {
+      const bestCandidateRegion = regionsRef.current.get(bestCandidateId)
+      return (
+        bestCandidateRegion && tryFocusFromEnteringPolicy(selectablesArray, bestCandidateRegion, currentFocusElement)
+      )
     }
 
     const bestCandidateSelectable = selectables.get(bestCandidateId)
     if (!bestCandidateSelectable) return false
 
-    if (bestCandidateSelectable.groupId !== currentFocus.groupId) {
-      const groupToFocus = groupsRef.current.get(bestCandidateSelectable.groupId)
-      if (groupToFocus && tryFocusFromEnteringPolicy(selectablesArray, groupToFocus, currentFocusElement)) return true
+    if (bestCandidateSelectable.regionId !== currentFocus.regionId) {
+      const regionToFocus = regionsRef.current.get(bestCandidateSelectable.regionId)
+      if (regionToFocus && tryFocusFromEnteringPolicy(selectablesArray, regionToFocus, currentFocusElement)) return true
     }
 
     focusTo(bestCandidateSelectable)
@@ -147,16 +149,16 @@ export const SelectionController = ({ children, initialFocusedId }: SelectionCon
 
   const onElementRegistered = (selectable: SelectableType) => selectablesRef.current.set(selectable.id, selectable)
   const onElementUnregistered = (id: string) => selectablesRef.current.delete(id)
-  const onGroupRegistered = (group: SelectableGroupType) => groupsRef.current.set(group.id, group)
-  const onGroupUnregistered = (id: string) => groupsRef.current.delete(id)
+  const onRegionRegistered = (region: SelectableRegionType) => regionsRef.current.set(region.id, region)
+  const onRegionUnregistered = (id: string) => regionsRef.current.delete(id)
 
   useLayoutEffect(() => {
     const abortController = new AbortController()
 
     eventManager.on('elementRegistered', onElementRegistered, abortController.signal)
     eventManager.on('elementUnregistered', onElementUnregistered, abortController.signal)
-    eventManager.on('groupRegistered', onGroupRegistered, abortController.signal)
-    eventManager.on('groupUnregistered', onGroupUnregistered, abortController.signal)
+    eventManager.on('regionRegistered', onRegionRegistered, abortController.signal)
+    eventManager.on('regionUnregistered', onRegionUnregistered, abortController.signal)
     window.addEventListener('keydown', onKeyDown, { signal: abortController.signal })
 
     return () => abortController.abort()
@@ -164,8 +166,8 @@ export const SelectionController = ({ children, initialFocusedId }: SelectionCon
   }, [])
 
   return (
-    <SelectableGroupContext.Provider value={{ groupId: '__global_arrow_navigation_context__' }}>
+    <SelectableRegionContext.Provider value={{ regionId: '__global_arrow_navigation_context__' }}>
       {children}
-    </SelectableGroupContext.Provider>
+    </SelectableRegionContext.Provider>
   )
 }

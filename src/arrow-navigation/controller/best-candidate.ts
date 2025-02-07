@@ -1,5 +1,6 @@
-import { SelectableGroupType, SelectableType } from '../types'
+import { SelectableRegionType, SelectableType } from '../types'
 
+// Finds the point on rect1 that is the closest to rect2
 const closestPointOnRect = (rect1: DOMRect, rect2: DOMRect) => {
   let x: number, y: number
 
@@ -22,10 +23,7 @@ const closestPointOnRect = (rect1: DOMRect, rect2: DOMRect) => {
   return { x, y }
 }
 
-// Computes the distance to the edge opposite to the direction
-// ex. if the direction is right, the returned value is the squared distance
-// between {x: currentFocus.right, y: currentFocus.centerY} and {x: candidate.left, y: candidate.centerY}
-const getSquaredDistance = (currentRect: DOMRect, candidateRect: DOMRect) => {
+const getShortestDistanceSquared = (currentRect: DOMRect, candidateRect: DOMRect) => {
   const p1 = closestPointOnRect(currentRect, candidateRect)
   const p2 = closestPointOnRect(candidateRect, currentRect)
   return (p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2
@@ -35,16 +33,11 @@ const areElementKeyPointsVisible = (element: HTMLElement) => {
   const rect = element.getBoundingClientRect()
 
   const pointsToCheckVisibility = [
-    // Corners
     { x: rect.left, y: rect.top },
     { x: rect.right, y: rect.top },
     { x: rect.left, y: rect.bottom },
     { x: rect.right, y: rect.bottom },
-
-    // Center
     { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 },
-
-    // Edges
     { x: rect.left + rect.width / 2, y: rect.top },
     { x: rect.left + rect.width / 2, y: rect.bottom },
     { x: rect.left, y: rect.top + rect.height / 2 },
@@ -54,7 +47,7 @@ const areElementKeyPointsVisible = (element: HTMLElement) => {
   return pointsToCheckVisibility.some((point) => element.ownerDocument.elementFromPoint(point.x, point.y) === element)
 }
 
-const nearestVisibleCandidate = <T extends SelectableType | SelectableGroupType>(
+const nearestVisibleCandidate = <T extends SelectableType | SelectableRegionType>(
   candidates: T[],
   currentFocusPosition: DOMRect
 ) =>
@@ -64,7 +57,7 @@ const nearestVisibleCandidate = <T extends SelectableType | SelectableGroupType>
 
     const rect = candidateElement.getBoundingClientRect()
 
-    const distanceSq = getSquaredDistance(currentFocusPosition, rect)
+    const distanceSq = getShortestDistanceSquared(currentFocusPosition, rect)
 
     if (!best) return { item: candidate, distance: distanceSq }
     if (distanceSq >= best.distance) return best
@@ -73,12 +66,9 @@ const nearestVisibleCandidate = <T extends SelectableType | SelectableGroupType>
     return isVisible ? { item: candidate, distance: distanceSq } : best
   }, null as { item: T; distance: number } | null)
 
-// Best candidate is a candidate the visible candidate
-// whose distance from the edge opposite to the direction is the closest to the current focus' edge of the direction
-// ex. if the direction is right, the best candidate is the one that has the closest left edge to the current focus' right edge
 export const findBestCandidate = (
   selectableCandidates: SelectableType[],
-  groupCandidates: SelectableGroupType[],
+  groupCandidates: SelectableRegionType[],
   currentFocus: SelectableType
 ) => {
   const currentFocusPosition = currentFocus.ref.current?.getBoundingClientRect()

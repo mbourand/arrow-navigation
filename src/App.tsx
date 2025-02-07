@@ -1,5 +1,5 @@
-import { group } from './arrow-navigation/components/Groups'
-import { selectable } from './arrow-navigation/components/Selectables'
+import { region } from './arrow-navigation/region/Region'
+import { selectable } from './arrow-navigation/selectable/Selectables'
 import { SelectionController } from './arrow-navigation/controller/SelectionController'
 import { MovieCategory } from './movies/MovieCategory'
 import { NavBar } from './navbar/NavBar'
@@ -10,12 +10,12 @@ function App() {
       <NavBar />
       <div className="w-full max-w-[1400px] p-4 mx-auto mt-8">
         <div className="w-full flex flex-col gap-8">
-          <group.div id="testeeee" className="w-full flex flex-row gap-4">
+          <region.div id="testeeee" className="w-full flex flex-row gap-4">
             <selectable.div className="w-32 h-6 rounded-full focus:outline-4 focus:outline-white bg-neutral-700" />
             <selectable.div className="w-32 h-6 rounded-full focus:outline-4 focus:outline-white bg-neutral-700" />
             <selectable.div className="w-32 h-6 rounded-full focus:outline-4 focus:outline-white bg-neutral-700" />
             <selectable.div className="w-32 h-6 rounded-full focus:outline-4 focus:outline-white bg-neutral-700" />
-          </group.div>
+          </region.div>
           <MovieCategory label="En ce moment sur le Ciné">
             {Array.from({ length: 20 }).map((_, index) => (
               <selectable.div
